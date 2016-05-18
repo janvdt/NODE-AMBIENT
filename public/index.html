@@ -33,7 +33,7 @@
     <nav class="navbar navbar-default">
       <div class="container-fluid">
         <div class="navbar-header">
-          <h2>Water project Interface</h2>
+          <h2>Water project Interface 2016 : HRKJ</h2>
         </div>
       </div>
     </nav>
@@ -101,6 +101,8 @@
       var counter = 0;
       var array = new Array();
       index = 0;
+      var Coordinates = [];
+      var bounds = new google.maps.LatLngBounds();
 
       var canvas = document.getElementById('linechart_temp'),
       ctx = canvas.getContext('2d'),
@@ -214,12 +216,18 @@
         var x = array[10]-100;
         var y = array[11]-100;
         var dt = new Date();
-        initMap(parseFloat(latitude_exact),parseFloat(longitude_exact));
+        add_marker(parseFloat(latitude_exact),parseFloat(latitude_exact));
+        initMap(parseFloat(latitude_exact),parseFloat(latitude_exact));
         var time = dt.getHours() + ":" + dt.getMinutes() + ":" + dt.getSeconds();
-        $("#data_sensor").append("<tr><td>" + moment().format() + "</td><td>" + array[0] + " % </td><td>No</td><td>0</td><td>" + array[1] + " " + "&#8451" + "</td><td>" + array[2] + "</td><td>" + latitude_exact + "</td><td>" + longitude_exact + "</td><td>" + array[9] + " dcl/m" + "</td><td>" + x + "\u00B0 : x" + " / " + y + "\u00B0 : y" + "</td><tr>");
+        $("#data_sensor").append("<tr><td>" + moment().format() + "</td><td>" + array[0] + " % </td><td>No</td><td>No</td><td>" + array[1] + " " + "&#8451" + "</td><td>" + array[2] + "</td><td>" + latitude_exact + "</td><td>" + longitude_exact + "</td><td>" + array[9] + " dcl/m" + "</td><td>" + x + "\u00B0 : x" + " / " + y + "\u00B0 : y" + "</td><tr>");
 
         timer();
         
+      }
+
+      function add_marker(latitude,longitude)
+      {
+          
       }
 
       function updatechart(temperature,x,y,flow)
@@ -277,12 +285,23 @@
         var map = new google.maps.Map(mapDiv, {
           center: myLatLng,
           zoom: 14
-        });
+        });          
 
         var marker = new google.maps.Marker({
           position: myLatLng,
           map: map,
           title: 'Position'
+        });
+
+        Coordinates.push(marker.getPosition());
+        bounds.extend(marker.position);
+
+        var flightPath = new google.maps.Polyline({
+          map: map,
+          path: Coordinates,
+          strokeColor: "#FF0000",
+          strokeOpacity: 1.0,
+          strokeWeight: 2
         });
       }
 
