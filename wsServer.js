@@ -35,7 +35,6 @@ function showPortOpen() {
 function sendSerialData(data) {
   // if there are webSocket connections, send the serial data
   // to all of them:
-  console.log(Number(data));
   if (connections.length > 0) {
     broadcast(data);
   }
@@ -71,7 +70,9 @@ function handleConnection(client) {
 }
 // This function broadcasts messages to all webSocket clients
 function broadcast(data) {
-  for (c in connections) {     // iterate over the array of connections
+  for (c in connections) {
+    console.log(data);     // iterate over the array of connections
     connections[c].send(JSON.stringify(data)); // send the data to each connection
+
   }
 }

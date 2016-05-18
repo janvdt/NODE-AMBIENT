@@ -1,12 +1,165 @@
 <!DOCTYPE html>
 <html>
   <head>
+  <style>
+      #map {
+        width: 500px;
+        height: 400px;
+      }
+      .mygrid-wrapper-div {
+      overflow: scroll;
+      height: 300px;
+    }
+    </style>
     <script  type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.4.8/p5.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.4.8/addons/p5.dom.js"></script>
-    <script type="text/javascript">
-      var text;		// variable for the text div you'll create
+    <script type="text/javascript" src="moment.js"></script>
+    <script type="text/javascript" src="http://www.chartjs.org/assets/Chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+    <link rel="stylesheet" src="style.css">
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+    <script src="https://maps.googleapis.com/maps/api/js" async defer></script>
+  </head>
+  <body>
+  <div class="row">
+
+  </div>
+  <div class="row col-xs-12">
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <h2>Water project Interface</h2>
+        </div>
+      </div>
+    </nav>
+  </div>
+  <div class="row col-xs-12">
+    <div class="progress">
+      <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="40">
+      </div>
+    </div>
+  </div>
+  <div class="row table col-xs-12">
+    <div class="col-xs-8">
+      <div class="mygrid-wrapper-div">
+        <table class="table">
+        <thead> 
+          <tr>
+            <th>Date <span class="glyphicon glyphicon glyphicon-calendar" aria-hidden="true"></span></th> 
+            <th>Battery <span class="glyphicon glyphicon-flash" aria-hidden="true"></span></th> 
+            <th>Water Temp <span class="glyphicon glyphicon-scale" aria-hidden="true"></span></th> 
+            <th>PH <span class="glyphicon glyphicon-scale" aria-hidden="true"></span></th>
+            <th>Latitude <span class="glyphicon glyphicon-screenshot" aria-hidden="true"></th>
+            <th>Longitude <span class="glyphicon glyphicon-screenshot" aria-hidden="true"></th>
+            <th>Flow meter</th>
+            <th>Accelero <span class="glyphicon glyphicon glyphicon-move" aria-hidden="true"></span></th>
+            </tr>
+          </thead> 
+          <tbody id ="data_sensor"> 
+          </tbody> 
+        </table>
+      </div>
+    </div>
+    <div class="col-xs-4">
+      <div id="map"></div>
+    </div>
+  </div>
+  <div class="row cols-xs-12">
+      
+  </div>
+  <div class="row col-md-12">
+    <div class="col-md-4">
+      <h2 class="col-md-offset-1">Flow meter</h2>
+      <div id="canvas-holder" class="col-md-5 linechart_flow">            
+          <canvas id="linechart_flow" width="500px"></canvas>
+      </div>
+    </div>
+    <div class="col-md-4">
+        <h2 class="col-md-offset-1">Water temperature</h2>
+        <div id="canvas-holder" class="col-md-5 linechart_temp">            
+            <canvas id="linechart_temp" width="500px"></canvas>
+        </div>
+    </div>
+    <div class="col-md-4">
+      <h2 class="col-md-offset-1">Accelero measurements</h2>
+      <div id="canvas-holder" class="col-md-5 linechart_acc">            
+          <canvas id="linechart_acc" width="500px"></canvas>
+      </div>
+    </div>
+  </div>
+  </body>
+  <script type="text/javascript">
+      var text;   // variable for the text div you'll create
       var socket = new WebSocket("ws://localhost:8081");
       var counter = 0;
+      var array = new Array();
+      index = 0;
+
+      var canvas = document.getElementById('linechart_temp'),
+      ctx = canvas.getContext('2d'),
+      startingData = {
+        labels: [1,2,3,4,5,6,7],
+          datasets: [
+          {
+              fillColor: "rgba(151,187,205,0.2)",
+              strokeColor: "rgba(151,187,205,1)",
+              pointColor: "rgba(151,187,205,1)",
+              pointStrokeColor: "#fff",
+              data: [0,0,0,0,0,0,0]
+          }
+          ]
+      },
+      latestLabel = startingData.labels[0];
+
+      var myLiveChart = new Chart(ctx).Line(startingData, {animationSteps: 15});
+
+      var canvas_flow = document.getElementById('linechart_flow'),
+      ctx = canvas_flow.getContext('2d'),
+      startingData_flow = {
+        labels: [1,2,3,4,5,6,7],
+          datasets: [
+          {
+              fillColor: "rgba(151,187,205,0.2)",
+              strokeColor: "rgba(151,187,205,1)",
+              pointColor: "rgba(151,187,205,1)",
+              pointStrokeColor: "#fff",
+              data: [0,0,0,0,0,0,0]
+          }
+          ]
+      },
+      latestLabel_flow = startingData_flow.labels[0];
+
+      var myLiveChart_flow = new Chart(ctx).Line(startingData_flow, {animationSteps: 15});
+
+      var canvas_acc = document.getElementById('linechart_acc'),
+      ctx = canvas_acc.getContext('2d'),
+      startingData_acc = {
+        labels: [1,2,3,4,5,6,7],
+        datasets: [
+            {
+                fillColor: "rgba(220,220,220,0.2)",
+                strokeColor: "rgba(220,220,220,1)",
+                pointColor: "rgba(220,220,220,1)",
+                pointStrokeColor: "#fff",
+                data: [0,0,0,0,0,0,0]
+            },
+            {
+                fillColor: "rgba(151,187,205,0.2)",
+                strokeColor: "rgba(151,187,205,1)",
+                pointColor: "rgba(151,187,205,1)",
+                pointStrokeColor: "#fff",
+                data: [0,0,0,0,0,0,0]
+            }
+        ]
+      },
+      latestLabel_acc = startingData_acc.labels[0];
+
+      var myLiveChart_acc = new Chart(ctx).Line(startingData_acc, {animationSteps: 15});
 
       function setup() {
         // The socket connection needs two event listeners:
@@ -14,13 +167,12 @@
         socket.onmessage = showData;
 
         // make a new div and position it at 10, 10:
-        text = createDiv("Sensor reading:");
-        text.position(10,10);
+        //text = createDiv("Sensor reading:");
+        //text.position(10,10);
       }
 
       function openSocket() {
-        text.html("Socket open");
-        socket.send("Hello server");
+        
       }
 
       /*
@@ -28,30 +180,126 @@
       from the server. So there's no need for a draw() function:
       */
       function showData(result) {
-        console.log(result.data);
-        console.log(counter);
-        if(counter == 10)
+        obj = JSON.parse(result.data);
+        if(counter >= 10 && counter < 22)
         {
-          // when the server returns, show the result in the div:
-          text.html("Sensor reading:" + result.data);
-          xPos = int(result.data);        // convert result to an integer
-          text.position(xPos, 10);
-          counter = counter + 1
-        }
-        else
-        {
-          counter = counter + 1;
+          array[index] = (obj.data[0]);
+          index = index + 1;
         }
 
-        if(counter > 22)
+        if(counter == 22)
         {
+          appenddata(array);
+          updatechart(array[1],array[10],array[11]);
+        }
+
+        counter = counter + 1;
+
+        if(counter > 1 && obj.data[0] == 192)
+        {
+          index = 0;
           counter = 0;
         }
-                // position the text
       }
-    </script>
-  </head>
-  <body>
 
-  </body>
+      function appenddata(array)
+      {
+        console.log(array);
+        var latitude = ((calculate_gps(array[3],array[4],array[5])-900000)/100000).toFixed(5);
+        var longitude = ((calculate_gps(array[6],array[7],array[8])-1800000)/10000).toFixed(6);
+        var latitude_exact = calculate_gps_exact(latitude).toFixed(5);
+        var longitude_exact = calculate_gps_exact(longitude).toFixed(6);
+        var x = array[10]-100;
+        var y = array[11]-100;
+        var dt = new Date();
+        initMap(parseFloat(latitude_exact),parseFloat(longitude_exact));
+        var time = dt.getHours() + ":" + dt.getMinutes() + ":" + dt.getSeconds();
+        $("#data_sensor").append("<tr><td>" + moment().format() + "</td><td>" + array[0] + " % </td><td>" + array[1] + " " + "&#8451" + "</td><td>" + array[2] + "</td><td>" + latitude_exact + "</td><td>" + longitude_exact + "</td><td>" + array[9] + " dcl/m" + "</td><td>" + x + "\u00B0 : x" + " / " + y + "\u00B0 : y" + "</td><tr>");
+
+        timer();
+        
+      }
+
+      function updatechart(temperature,x,y)
+      {
+        myLiveChart.addData([temperature], ++latestLabel);
+        myLiveChart_acc.addData([x-100,y-100], ++latestLabel_acc);
+        myLiveChart.removeData();
+        myLiveChart_acc.removeData();
+      }
+
+      function calculate_gps(part_1,part_2,part_3)
+      {
+        var part1 = dec2bin(part_1);
+        var part2 = dec2bin(part_2);
+        var part3 = dec2bin(part_3);
+
+        var total = part1 + part2 + part3;
+
+        return parseInt(total, 2);
+      }
+
+      function calculate_gps_exact(data)
+      {
+          var n = Math.floor(data);
+          var remainer = (data % 1).toFixed(4);
+          var decimal = (remainer/60)*100;
+          var total = n + decimal;
+          console.log(total);
+          return total;
+      }
+
+      function dec2bin(dec){
+          var length_needed = 8;
+          var string = (dec).toString(2);
+          var difference = length_needed - string.length;
+          for(var i = 0;i<difference;i++)
+          {
+            string = "0" + string;
+          }
+            return string;
+      }
+
+      function divideCurrencyEvenly(numerator, divisor) {
+        var minPartSize = +(numerator / divisor).toFixed(2)
+        return divideEvenly(numerator*100, minPartSize*100).map(function(v) {
+        return (v/100).toFixed(2);
+      });
+    }
+
+      function initMap(latitude,longitude) {
+        var myLatLng = {lat: latitude, lng: longitude};
+        var mapDiv = document.getElementById('map');
+        var map = new google.maps.Map(mapDiv, {
+          center: myLatLng,
+          zoom: 14
+        });
+
+        var marker = new google.maps.Marker({
+          position: myLatLng,
+          map: map,
+          title: 'Position',
+          icon: 'boat.png'
+        });
+      }
+
+      function timer(){
+        
+         var count_timer = 0;
+         var timer = setInterval(function() {
+              count_timer = count_timer + 2.5;
+              $('.progress-bar').css('width', count_timer+'%').attr('aria-valuenow', count_timer);
+
+              if(count_timer > 97)
+              {
+                 clearInterval(timer);
+              }
+
+        }, 1000);
+
+         
+
+      }
+
+    </script>
 </html>
