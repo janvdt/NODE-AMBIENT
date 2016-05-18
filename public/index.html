@@ -51,12 +51,14 @@
         <thead> 
           <tr>
             <th>Date <span class="glyphicon glyphicon glyphicon-calendar" aria-hidden="true"></span></th> 
-            <th>Battery <span class="glyphicon glyphicon-flash" aria-hidden="true"></span></th> 
+            <th>Battery <span class="glyphicon glyphicon-flash" aria-hidden="true"></span></th>
+            <th>Charging <span class="glyphicon glyphicon-certificate" aria-hidden="true"></span></th>
+            <th>Waterleak <span class="glyphicon glyphicon-tint" aria-hidden="true"></th> 
             <th>Water Temp <span class="glyphicon glyphicon-scale" aria-hidden="true"></span></th> 
             <th>PH <span class="glyphicon glyphicon-scale" aria-hidden="true"></span></th>
             <th>Latitude <span class="glyphicon glyphicon-screenshot" aria-hidden="true"></th>
             <th>Longitude <span class="glyphicon glyphicon-screenshot" aria-hidden="true"></th>
-            <th>Flow meter</th>
+            <th>Flow meter <span class="glyphicon glyphicon-transfer" aria-hidden="true"></th>
             <th>Accelero <span class="glyphicon glyphicon glyphicon-move" aria-hidden="true"></span></th>
             </tr>
           </thead> 
@@ -214,7 +216,7 @@
         var dt = new Date();
         initMap(parseFloat(latitude_exact),parseFloat(longitude_exact));
         var time = dt.getHours() + ":" + dt.getMinutes() + ":" + dt.getSeconds();
-        $("#data_sensor").append("<tr><td>" + moment().format() + "</td><td>" + array[0] + " % </td><td>" + array[1] + " " + "&#8451" + "</td><td>" + array[2] + "</td><td>" + latitude_exact + "</td><td>" + longitude_exact + "</td><td>" + array[9] + " dcl/m" + "</td><td>" + x + "\u00B0 : x" + " / " + y + "\u00B0 : y" + "</td><tr>");
+        $("#data_sensor").append("<tr><td>" + moment().format() + "</td><td>" + array[0] + " % </td><td>No</td><td>0</td><td>" + array[1] + " " + "&#8451" + "</td><td>" + array[2] + "</td><td>" + latitude_exact + "</td><td>" + longitude_exact + "</td><td>" + array[9] + " dcl/m" + "</td><td>" + x + "\u00B0 : x" + " / " + y + "\u00B0 : y" + "</td><tr>");
 
         timer();
         
@@ -280,8 +282,7 @@
         var marker = new google.maps.Marker({
           position: myLatLng,
           map: map,
-          title: 'Position',
-          icon: 'boat.png'
+          title: 'Position'
         });
       }
 
