@@ -103,7 +103,7 @@
       var canvas = document.getElementById('linechart_temp'),
       ctx = canvas.getContext('2d'),
       startingData = {
-        labels: [1,2,3,4,5,6,7],
+        labels: ["x","x","x","x","x","x","x"],
           datasets: [
           {
               fillColor: "rgba(151,187,205,0.2)",
@@ -121,7 +121,7 @@
       var canvas_flow = document.getElementById('linechart_flow'),
       ctx = canvas_flow.getContext('2d'),
       startingData_flow = {
-        labels: [1,2,3,4,5,6,7],
+        labels: ["x","x","x","x","x","x","x"],
           datasets: [
           {
               fillColor: "rgba(151,187,205,0.2)",
@@ -139,7 +139,7 @@
       var canvas_acc = document.getElementById('linechart_acc'),
       ctx = canvas_acc.getContext('2d'),
       startingData_acc = {
-        labels: [1,2,3,4,5,6,7],
+        labels: ["x","x","x","x","x","x","x"],
         datasets: [
             {
                 fillColor: "rgba(220,220,220,0.2)",
@@ -190,7 +190,7 @@
         if(counter == 22)
         {
           appenddata(array);
-          updatechart(array[1],array[10],array[11]);
+          updatechart(array[1],array[10],array[11],array[9]);
         }
 
         counter = counter + 1;
@@ -220,12 +220,14 @@
         
       }
 
-      function updatechart(temperature,x,y)
+      function updatechart(temperature,x,y,flow)
       {
-        myLiveChart.addData([temperature], ++latestLabel);
-        myLiveChart_acc.addData([x-100,y-100], ++latestLabel_acc);
+        myLiveChart_flow.addData([flow], moment().format('LT'));
+        myLiveChart.addData([temperature], moment().format('LT'));
+        myLiveChart_acc.addData([x-100,y-100],moment().format('LT'));
         myLiveChart.removeData();
         myLiveChart_acc.removeData();
+        myLiveChart_flow.removeData();
       }
 
       function calculate_gps(part_1,part_2,part_3)
