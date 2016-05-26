@@ -215,25 +215,21 @@
         var longitude_exact = calculate_gps_exact(longitude).toFixed(6);
         var x = array[10]-100;
         var y = array[11]-100;
+        var flow = array[9]*1.5;
+        var temperature = array[1] + 4;
         var dt = new Date();
-        add_marker(parseFloat(latitude_exact),parseFloat(latitude_exact));
-        initMap(parseFloat(latitude_exact),parseFloat(latitude_exact));
+        initMap(parseFloat(latitude_exact),parseFloat(longitude_exact));
         var time = dt.getHours() + ":" + dt.getMinutes() + ":" + dt.getSeconds();
-        $("#data_sensor").append("<tr><td>" + moment().format() + "</td><td>" + array[0] + " % </td><td>No</td><td>No</td><td>" + array[1] + " " + "&#8451" + "</td><td>" + array[2] + "</td><td>" + latitude_exact + "</td><td>" + longitude_exact + "</td><td>" + array[9] + " dcl/m" + "</td><td>" + x + "\u00B0 : x" + " / " + y + "\u00B0 : y" + "</td><tr>");
+        $("#data_sensor").append("<tr><td>" + moment().format() + "</td><td>" + array[0] + " % </td><td>No</td><td>No</td><td>" + temperature + " " + "&#8451" + "</td><td>" + array[2] + "</td><td>" + latitude_exact + "</td><td>" + longitude_exact + "</td><td>" + flow + " ml/m" + "</td><td>" + x + "\u00B0 : x" + " / " + y + "\u00B0 : y" + "</td><tr>");
 
         timer();
         
       }
 
-      function add_marker(latitude,longitude)
-      {
-          
-      }
-
       function updatechart(temperature,x,y,flow)
       {
-        myLiveChart_flow.addData([flow], moment().format('LT'));
-        myLiveChart.addData([temperature], moment().format('LT'));
+        myLiveChart_flow.addData([flow*1.5], moment().format('LT'));
+        myLiveChart.addData([temperature + 4], moment().format('LT'));
         myLiveChart_acc.addData([x-100,y-100],moment().format('LT'));
         myLiveChart.removeData();
         myLiveChart_acc.removeData();
@@ -257,7 +253,6 @@
           var remainer = (data % 1).toFixed(4);
           var decimal = (remainer/60)*100;
           var total = n + decimal;
-          console.log(total);
           return total;
       }
 
@@ -280,6 +275,7 @@
     }
 
       function initMap(latitude,longitude) {
+        
         var myLatLng = {lat: latitude, lng: longitude};
         var mapDiv = document.getElementById('map');
         var map = new google.maps.Map(mapDiv, {
